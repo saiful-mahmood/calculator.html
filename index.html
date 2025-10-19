@@ -1,33 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Prime Clean Care Instant Quote</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #f5f8fa;
-      padding: 20px;
+      margin: 0;
+      padding: 40px 20px;
     }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      max-width: 1000px;
+      margin: auto;
+      gap: 20px;
+    }
+
     #quote-box {
-      max-width: 520px;
-      margin: 40px auto;
+      flex: 1;
+      min-width: 300px;
       background: white;
       border-radius: 16px;
       padding: 24px;
       box-shadow: 0 6px 15px rgba(0,0,0,0.08);
     }
-    h2, h3 {
+
+    #result-box {
+      flex: 1;
+      min-width: 300px;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    h2 {
       text-align: center;
       color: #004d99;
     }
+
     label {
       display: block;
       margin-top: 12px;
       font-weight: bold;
     }
-    input, select, button {
+
+    input,
+    select {
       width: 100%;
       padding: 10px;
       margin-top: 6px;
@@ -35,82 +61,81 @@
       border: 1px solid #ccc;
       font-size: 1em;
     }
-    button {
-      background: #0077cc;
-      color: white;
-      border: none;
-      cursor: pointer;
-      margin-top: 18px;
-      font-weight: bold;
-    }
-    button:hover {
-      background: #005fa3;
-    }
-    #quoteResult {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 1.2em;
-      color: #222;
-    }
-    footer {
-      text-align: center;
-      margin-top: 25px;
-      font-size: 0.9em;
-      color: #666;
-    }
+
     .inline-option {
       display: flex;
       align-items: center;
       margin-top: 10px;
     }
+
     .inline-option input {
       width: auto;
       margin-right: 10px;
     }
+
+    #quoteResult {
+      font-size: 1.8em;
+      color: #222;
+      font-weight: bold;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 0.9em;
+      color: #666;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+    }
   </style>
 </head>
 <body>
-  <div id="quote-box">
-    <h2>Get an Instant Cleaning Quote</h2>
+  <div class="container">
+    <div id="quote-box">
+      <h2>Instant Cleaning Quote</h2>
 
-    <label for="size">Size (sq ft):</label>
-    <input type="number" id="size" placeholder="e.g. 2000">
+      <label for="size">Size (sq ft):</label>
+      <input type="number" id="size" placeholder="e.g. 2000" />
 
-    <label for="cleaningType">Cleaning Type:</label>
-    <select id="cleaningType">
-      <option value="deep">Deep Cleaning</option>
-      <option value="recurring">Recurring Cleaning</option>
-      <option value="custom">Custom Cleaning</option>
-    </select>
+      <label for="cleaningType">Cleaning Type:</label>
+      <select id="cleaningType">
+        <option value="deep">Deep Cleaning</option>
+        <option value="recurring" selected>Recurring Cleaning</option>
+        <option value="custom">Custom Cleaning</option>
+      </select>
 
-    <label for="frequency">Frequency:</label>
-    <select id="frequency">
-      <option value="once">One-Time</option>
-      <option value="monthly">Monthly</option>
-      <option value="biweekly">Bi-Weekly</option>
-      <option value="weekly">Weekly</option>
-      <option value="daily">Daily</option>
-    </select>
+      <label for="frequency">Frequency:</label>
+      <select id="frequency">
+        <option value="once">One-Time</option>
+        <option value="monthly">Monthly</option>
+        <option value="biweekly">Bi-Weekly</option>
+        <option value="weekly">Weekly</option>
+        <option value="daily">Daily</option>
+      </select>
 
-    <!-- Extras Section (visible only for Deep Cleaning) -->
-    <div id="extras" style="display: none; margin-top: 15px;">
-      <label for="windows">Number of Windows:</label>
-      <input type="number" id="windows" value="0" min="0">
+      <div id="extras" style="display: none; margin-top: 15px;">
+        <label for="windows">Number of Windows:</label>
+        <input type="number" id="windows" value="0" min="0" />
 
-      <div class="inline-option">
-        <input type="checkbox" id="fridge">
-        <label for="fridge">Include Inside Fridge (+$50)</label>
-      </div>
+        <div class="inline-option">
+          <input type="checkbox" id="fridge" />
+          <label for="fridge">Include Inside Fridge (+$50)</label>
+        </div>
 
-      <div class="inline-option">
-        <input type="checkbox" id="oven">
-        <label for="oven">Include Oven (+$50)</label>
+        <div class="inline-option">
+          <input type="checkbox" id="oven" />
+          <label for="oven">Include Oven (+$50)</label>
+        </div>
       </div>
     </div>
 
-    <button id="calculate">Calculate Quote</button>
-
-    <h3 id="quoteResult"></h3>
+    <div id="result-box">
+      <div id="quoteResult">Your Total is: $0.00</div>
+    </div>
   </div>
 
   <footer>
@@ -119,27 +144,22 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-      const calcBtn = document.getElementById("calculate");
-      const result = document.getElementById("quoteResult");
+      const sizeInput = document.getElementById("size");
       const cleaningTypeSelect = document.getElementById("cleaningType");
+      const frequencySelect = document.getElementById("frequency");
+      const windowsInput = document.getElementById("windows");
+      const fridgeCheckbox = document.getElementById("fridge");
+      const ovenCheckbox = document.getElementById("oven");
       const extrasSection = document.getElementById("extras");
+      const result = document.getElementById("quoteResult");
 
-      // Show/Hide Extras section
-      cleaningTypeSelect.addEventListener("change", function () {
-        if (cleaningTypeSelect.value === "deep") {
-          extrasSection.style.display = "block";
-        } else {
-          extrasSection.style.display = "none";
-        }
-      });
-
-      calcBtn.addEventListener("click", function () {
-        const size = parseFloat(document.getElementById("size").value);
-        const cleaningType = document.getElementById("cleaningType").value;
-        const frequency = document.getElementById("frequency").value;
-        const windows = parseInt(document.getElementById("windows").value) || 0;
-        const fridge = document.getElementById("fridge").checked;
-        const oven = document.getElementById("oven").checked;
+      function calculateQuote() {
+        const size = parseFloat(sizeInput.value);
+        const cleaningType = cleaningTypeSelect.value;
+        const frequency = frequencySelect.value;
+        const windows = parseInt(windowsInput.value) || 0;
+        const fridge = fridgeCheckbox.checked;
+        const oven = ovenCheckbox.checked;
 
         if (!size || size <= 0) {
           result.innerHTML = "⚠️ Please enter a valid property size.";
@@ -148,7 +168,7 @@
 
         let total = 0;
 
-        // Deep Cleaning Logic
+        // Deep Cleaning
         if (cleaningType === "deep") {
           if (size < 1500) {
             total = 350;
@@ -160,13 +180,13 @@
           }
           total = Math.max(total, 250);
 
-          // Add extras
+          // Extras
           if (oven) total += 50;
           if (fridge) total += 50;
           if (windows > 0) total += windows * 6;
         }
 
-        // Recurring Cleaning Logic
+        // Recurring Cleaning
         else if (cleaningType === "recurring") {
           if (size > 5000) {
             result.innerHTML = "📞 For homes over 5000 sq ft, please call for a custom quote.";
@@ -194,6 +214,7 @@
             case "daily": multiplier = 0.85 * 0.85 * 0.85; break;
             case "once": multiplier = 1.25; break;
           }
+
           total *= multiplier;
         }
 
@@ -203,8 +224,22 @@
           return;
         }
 
-        result.innerHTML = `Estimated Total: <strong>$${total.toFixed(2)}</strong>`;
+        result.innerHTML = `Your Total is: <strong>$${total.toFixed(2)}</strong>`;
+      }
+
+      // Event listeners for all inputs
+      [sizeInput, cleaningTypeSelect, frequencySelect, windowsInput, fridgeCheckbox, ovenCheckbox].forEach(input => {
+        input.addEventListener("input", calculateQuote);
+        input.addEventListener("change", calculateQuote);
       });
+
+      // Show/hide extras
+      cleaningTypeSelect.addEventListener("change", function () {
+        extrasSection.style.display = this.value === "deep" ? "block" : "none";
+      });
+
+      // Initial calculation
+      calculateQuote();
     });
   </script>
 </body>
