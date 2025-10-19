@@ -1,91 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Prime Clean Care Instant Quote</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f5f8fa;
-    padding: 20px;
-  }
-  #quote-box {
-    max-width: 520px;
-    margin: 40px auto;
-    background: white;
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.08);
-  }
-  h2, h3 {
-    text-align: center;
-    color: #004d99;
-  }
-  label {
-    display: block;
-    margin-top: 12px;
-    font-weight: bold;
-  }
-  input, select, button {
-    width: 100%;
-    padding: 10px;
-    margin-top: 6px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    font-size: 1em;
-  }
-  button {
-    background: #0077cc;
-    color: white;
-    border: none;
-    cursor: pointer;
-    margin-top: 18px;
-    font-weight: bold;
-  }
-  button:hover {
-    background: #005fa3;
-  }
-  #quoteResult {
-    text-align: center;
-    margin-top: 20px;
-    font-size: 1.2em;
-    color: #222;
-  }
-  footer {
-    text-align: center;
-    margin-top: 25px;
-    font-size: 0.9em;
-    color: #666;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>Prime Clean Care Instant Quote</title>
+  <style>
+    body { font-family: Arial; background: #f5f8fa; padding: 20px; }
+    #quote-box { max-width: 520px; margin: 40px auto; background: white; border-radius: 16px; padding: 24px; box-shadow: 0 6px 15px rgba(0,0,0,0.08); }
+    h2, h3 { text-align: center; color: #004d99; }
+    label { display: block; margin-top: 12px; font-weight: bold; }
+    input, select, button { width: 100%; padding: 10px; margin-top: 6px; border-radius: 6px; border: 1px solid #ccc; font-size: 1em; }
+    button { background: #0077cc; color: white; border: none; cursor: pointer; margin-top: 18px; font-weight: bold; }
+    button:hover { background: #005fa3; }
+    #quoteResult { text-align: center; margin-top: 20px; font-size: 1.2em; color: #222; }
+    footer { text-align: center; margin-top: 25px; font-size: 0.9em; color: #666; }
+  </style>
 </head>
 <body>
   <div id="quote-box">
     <h2>Get an Instant Cleaning Quote</h2>
-
-    <label for="propertyType">Property Type:</label>
-    <select id="propertyType">
-      <option value="house">House</option>
-      <option value="office">Office</option>
-    </select>
 
     <label for="size">Size (sq ft):</label>
     <input type="number" id="size" placeholder="e.g. 2000">
 
     <label for="cleaningType">Cleaning Type:</label>
     <select id="cleaningType">
-      <option value="standard">Standard Cleaning</option>
       <option value="deep">Deep Cleaning</option>
-      <option value="moveout">Move In / Out Cleaning</option>
+      <option value="recurring">Recurring Cleaning</option>
+      <option value="custom">Custom Cleaning</option>
     </select>
 
     <label for="frequency">Frequency:</label>
     <select id="frequency">
       <option value="once">One-Time</option>
-      <option value="biweekly">Biweekly (10% off)</option>
-      <option value="monthly">Monthly (5% off)</option>
+      <option value="monthly">Monthly</option>
+      <option value="biweekly">Bi-Weekly</option>
+      <option value="weekly">Weekly</option>
+      <option value="daily">Daily</option>
     </select>
+
+    <label for="windows">Number of Windows:</label>
+    <input type="number" id="windows" value="0" min="0">
+
+    <label>
+      <input type="checkbox" id="fridge"> Include Inside Fridge (+$50)
+    </label>
+
+    <label>
+      <input type="checkbox" id="oven"> Include Oven (+$50)
+    </label>
 
     <button id="calculate">Calculate Quote</button>
 
@@ -96,33 +58,104 @@
     <p>Need a custom quote? Call <strong>(351) 300-7334</strong> — Prime Clean Care</p>
   </footer>
 
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-  const calcBtn = document.getElementById("calculate");
-  const result = document.getElementById("quoteResult");
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const calcBtn = document.getElementById("calculate");
+      const result = document.getElementById("quoteResult");
 
-  calcBtn.addEventListener("click", function() {
-    const size = parseFloat(document.getElementById("size").value);
-    const cleaningType = document.getElementById("cleaningType").value;
-    const frequency = document.getElementById("frequency").value;
+      calcBtn.addEventListener("click", function () {
+        const size = parseFloat(document.getElementById("size").value);
+        const cleaningType = document.getElementById("cleaningType").value;
+        const frequency = document.getElementById("frequency").value;
+        const windows = parseInt(document.getElementById("windows").value) || 0;
+        const fridge = document.getElementById("fridge").checked;
+        const oven = document.getElementById("oven").checked;
 
-    if (!size || size <= 0) {
-      result.innerHTML = "⚠️ Please enter a valid property size.";
-      return;
-    }
+        if (!size || size <= 0) {
+          result.innerHTML = "⚠️ Please enter a valid property size.";
+          return;
+        }
 
-    let baseRate = 0.15; // Standard Cleaning
-    if (cleaningType === "deep") baseRate = 0.20;
-    if (cleaningType === "moveout") baseRate = 0.25;
+        let total = 0;
 
-    let total = size * baseRate;
+        // ------------------------------
+        // DEEP CLEANING
+        // ------------------------------
+        if (cleaningType === "deep") {
+          if (size < 1500) {
+            total = 350;
+          } else {
+            total = 350;
+            let extraSqft = size - 1500;
+            let extraBlocks = Math.ceil(extraSqft / 200);
+            total += total * (0.15 * extraBlocks);
+          }
+          total = Math.max(total, 250); // Enforce minimum
+        }
 
-    if (frequency === "biweekly") total *= 0.9;
-    if (frequency === "monthly") total *= 0.95;
+        // ------------------------------
+        // RECURRING CLEANING
+        // ------------------------------
+        else if (cleaningType === "recurring") {
+          if (size > 5000) {
+            result.innerHTML = "📞 For homes over 5000 sq ft, please call for a custom quote.";
+            return;
+          }
 
-    result.innerHTML = `Estimated Total: <strong>$${total.toFixed(2)}</strong>`;
-  });
-});
-</script>
+          if (size < 1200) {
+            total = 180;
+          } else if (size <= 1500) {
+            total = 195;
+          } else if (size <= 1700) {
+            total = 205;
+          } else if (size < 2000) {
+            total = 220;
+          } else {
+            result.innerHTML = "📞 For homes over 2000 sq ft, please call for a custom quote.";
+            return;
+          }
+
+          // Frequency discount (more frequent = cheaper)
+          let frequencyMultiplier = 1;
+          switch (frequency) {
+            case "monthly":
+              frequencyMultiplier = 1;
+              break;
+            case "biweekly":
+              frequencyMultiplier = 0.85; // 15% less
+              break;
+            case "weekly":
+              frequencyMultiplier = 0.85 * 0.85;
+              break;
+            case "daily":
+              frequencyMultiplier = 0.85 * 0.85 * 0.85;
+              break;
+            case "once":
+              frequencyMultiplier = 1.25; // Assume one-time is more expensive
+              break;
+          }
+
+          total = total * frequencyMultiplier;
+        }
+
+        // ------------------------------
+        // CUSTOM CLEANING
+        // ------------------------------
+        else if (cleaningType === "custom") {
+          result.innerHTML = "📞 Please call us for a custom cleaning quote.";
+          return;
+        }
+
+        // ------------------------------
+        // EXTRAS
+        // ------------------------------
+        if (oven) total += 50;
+        if (fridge) total += 50;
+        if (windows > 0) total += windows * 6;
+
+        result.innerHTML = `Estimated Total: <strong>$${total.toFixed(2)}</strong>`;
+      });
+    });
+  </script>
 </body>
 </html>
