@@ -5,78 +5,97 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Prime Clean Care Instant Quote</title>
   <style>
+    :root {
+      --primary-color: #004d99;
+      --bg-color: #f5f8fa;
+      --white: #ffffff;
+    }
+
     body {
       font-family: Arial, sans-serif;
-      background: #f5f8fa;
+      background: var(--bg-color);
       margin: 0;
-      padding: 40px 20px;
+      padding: 30px 16px;
     }
 
     .container {
       display: flex;
       flex-wrap: wrap;
+      justify-content: center;
       max-width: 1000px;
       margin: auto;
       gap: 20px;
     }
 
-    #quote-box {
+    #quote-box,
+    #result-box {
       flex: 1;
-      min-width: 300px;
-      background: white;
+      min-width: 320px;
+      background: var(--white);
       border-radius: 16px;
       padding: 24px;
       box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+      box-sizing: border-box;
     }
 
     #result-box {
-      flex: 1;
-      min-width: 300px;
-      background: #ffffff;
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.08);
       display: flex;
       align-items: center;
       justify-content: center;
+      text-align: center;
     }
 
     h2 {
       text-align: center;
-      color: #004d99;
+      color: var(--primary-color);
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 1.6em;
     }
 
     label {
       display: block;
-      margin-top: 12px;
+      margin-top: 14px;
       font-weight: bold;
+      font-size: 0.95em;
     }
 
     input,
     select {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       margin-top: 6px;
-      border-radius: 6px;
+      border-radius: 8px;
       border: 1px solid #ccc;
       font-size: 1em;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--primary-color);
+      outline: none;
     }
 
     .inline-option {
       display: flex;
       align-items: center;
       margin-top: 10px;
+      font-size: 0.95em;
     }
 
     .inline-option input {
       width: auto;
-      margin-right: 10px;
+      margin-right: 8px;
+      transform: scale(1.2);
     }
 
     #quoteResult {
       font-size: 1.8em;
       color: #222;
       font-weight: bold;
+      word-wrap: break-word;
     }
 
     footer {
@@ -86,9 +105,51 @@
       color: #666;
     }
 
+    footer strong {
+      color: var(--primary-color);
+    }
+
+    /* Mobile Optimizations */
     @media (max-width: 768px) {
+      body {
+        padding: 20px 12px;
+      }
+
       .container {
         flex-direction: column;
+        gap: 16px;
+      }
+
+      h2 {
+        font-size: 1.4em;
+      }
+
+      input, select {
+        font-size: 1em;
+        padding: 10px;
+      }
+
+      #quoteResult {
+        font-size: 1.5em;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 15px 10px;
+      }
+
+      #quote-box,
+      #result-box {
+        padding: 20px 16px;
+      }
+
+      h2 {
+        font-size: 1.3em;
+      }
+
+      #quoteResult {
+        font-size: 1.3em;
       }
     }
   </style>
@@ -99,7 +160,7 @@
       <h2>Instant Cleaning Quote</h2>
 
       <label for="size">Size (sq ft):</label>
-      <input type="number" id="size" placeholder="e.g. 2000" />
+      <input type="number" id="size" placeholder="e.g. 2000" inputmode="numeric" />
 
       <label for="cleaningType">Cleaning Type:</label>
       <select id="cleaningType">
@@ -119,7 +180,7 @@
 
       <div id="extras" style="display: none; margin-top: 15px;">
         <label for="windows">Number of Windows:</label>
-        <input type="number" id="windows" value="0" min="0" />
+        <input type="number" id="windows" value="0" min="0" inputmode="numeric" />
 
         <div class="inline-option">
           <input type="checkbox" id="fridge" />
@@ -193,26 +254,22 @@
             return;
           }
 
-          if (size < 1200) {
-            total = 180;
-          } else if (size <= 1500) {
-            total = 195;
-          } else if (size <= 1700) {
-            total = 205;
-          } else if (size < 2000) {
-            total = 220;
-          } else {
+          if (size < 1200) total = 180;
+          else if (size <= 1500) total = 195;
+          else if (size <= 1700) total = 205;
+          else if (size < 2000) total = 220;
+          else {
             result.innerHTML = "📞 For homes over 2000 sq ft, please call for a custom quote.";
             return;
           }
 
           let multiplier = 1;
           switch (frequency) {
+            case "once": multiplier = 1.25; break;
             case "monthly": multiplier = 1; break;
             case "biweekly": multiplier = 0.85; break;
             case "weekly": multiplier = 0.85 * 0.85; break;
             case "daily": multiplier = 0.85 * 0.85 * 0.85; break;
-            case "once": multiplier = 1.25; break;
           }
 
           total *= multiplier;
@@ -227,18 +284,15 @@
         result.innerHTML = `Your Total is: <strong>$${total.toFixed(2)}</strong>`;
       }
 
-      // Event listeners for all inputs
       [sizeInput, cleaningTypeSelect, frequencySelect, windowsInput, fridgeCheckbox, ovenCheckbox].forEach(input => {
         input.addEventListener("input", calculateQuote);
         input.addEventListener("change", calculateQuote);
       });
 
-      // Show/hide extras
       cleaningTypeSelect.addEventListener("change", function () {
         extrasSection.style.display = this.value === "deep" ? "block" : "none";
       });
 
-      // Initial calculation
       calculateQuote();
     });
   </script>
