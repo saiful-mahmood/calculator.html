@@ -3,16 +3,70 @@
 <head>
   <meta charset="UTF-8">
   <title>Prime Clean Care Instant Quote</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body { font-family: Arial; background: #f5f8fa; padding: 20px; }
-    #quote-box { max-width: 520px; margin: 40px auto; background: white; border-radius: 16px; padding: 24px; box-shadow: 0 6px 15px rgba(0,0,0,0.08); }
-    h2, h3 { text-align: center; color: #004d99; }
-    label { display: block; margin-top: 12px; font-weight: bold; }
-    input, select, button { width: 100%; padding: 10px; margin-top: 6px; border-radius: 6px; border: 1px solid #ccc; font-size: 1em; }
-    button { background: #0077cc; color: white; border: none; cursor: pointer; margin-top: 18px; font-weight: bold; }
-    button:hover { background: #005fa3; }
-    #quoteResult { text-align: center; margin-top: 20px; font-size: 1.2em; color: #222; }
-    footer { text-align: center; margin-top: 25px; font-size: 0.9em; color: #666; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f8fa;
+      padding: 20px;
+    }
+    #quote-box {
+      max-width: 520px;
+      margin: 40px auto;
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    }
+    h2, h3 {
+      text-align: center;
+      color: #004d99;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+    }
+    button {
+      background: #0077cc;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 18px;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #005fa3;
+    }
+    #quoteResult {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #222;
+    }
+    footer {
+      text-align: center;
+      margin-top: 25px;
+      font-size: 0.9em;
+      color: #666;
+    }
+    .inline-option {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+    }
+    .inline-option input {
+      width: auto;
+      margin-right: 10px;
+    }
   </style>
 </head>
 <body>
@@ -38,16 +92,21 @@
       <option value="daily">Daily</option>
     </select>
 
-    <label for="windows">Number of Windows:</label>
-    <input type="number" id="windows" value="0" min="0">
+    <!-- Extras Section (visible only for Deep Cleaning) -->
+    <div id="extras" style="display: none; margin-top: 15px;">
+      <label for="windows">Number of Windows:</label>
+      <input type="number" id="windows" value="0" min="0">
 
-    <label>
-      <input type="checkbox" id="fridge"> Include Inside Fridge (+$50)
-    </label>
+      <div class="inline-option">
+        <input type="checkbox" id="fridge">
+        <label for="fridge">Include Inside Fridge (+$50)</label>
+      </div>
 
-    <label>
-      <input type="checkbox" id="oven"> Include Oven (+$50)
-    </label>
+      <div class="inline-option">
+        <input type="checkbox" id="oven">
+        <label for="oven">Include Oven (+$50)</label>
+      </div>
+    </div>
 
     <button id="calculate">Calculate Quote</button>
 
@@ -62,6 +121,17 @@
     document.addEventListener("DOMContentLoaded", function () {
       const calcBtn = document.getElementById("calculate");
       const result = document.getElementById("quoteResult");
+      const cleaningTypeSelect = document.getElementById("cleaningType");
+      const extrasSection = document.getElementById("extras");
+
+      // Show/Hide Extras section
+      cleaningTypeSelect.addEventListener("change", function () {
+        if (cleaningTypeSelect.value === "deep") {
+          extrasSection.style.display = "block";
+        } else {
+          extrasSection.style.display = "none";
+        }
+      });
 
       calcBtn.addEventListener("click", function () {
         const size = parseFloat(document.getElementById("size").value);
@@ -78,9 +148,7 @@
 
         let total = 0;
 
-        // ------------------------------
-        // DEEP CLEANING
-        // ------------------------------
+        // Deep Cleaning Logic
         if (cleaningType === "deep") {
           if (size < 1500) {
             total = 350;
@@ -90,12 +158,15 @@
             let extraBlocks = Math.ceil(extraSqft / 200);
             total += total * (0.15 * extraBlocks);
           }
-          total = Math.max(total, 250); // Enforce minimum
+          total = Math.max(total, 250);
+
+          // Add extras
+          if (oven) total += 50;
+          if (fridge) total += 50;
+          if (windows > 0) total += windows * 6;
         }
 
-        // ------------------------------
-        // RECURRING CLEANING
-        // ------------------------------
+        // Recurring Cleaning Logic
         else if (cleaningType === "recurring") {
           if (size > 5000) {
             result.innerHTML = "📞 For homes over 5000 sq ft, please call for a custom quote.";
@@ -115,43 +186,22 @@
             return;
           }
 
-          // Frequency discount (more frequent = cheaper)
-          let frequencyMultiplier = 1;
+          let multiplier = 1;
           switch (frequency) {
-            case "monthly":
-              frequencyMultiplier = 1;
-              break;
-            case "biweekly":
-              frequencyMultiplier = 0.85; // 15% less
-              break;
-            case "weekly":
-              frequencyMultiplier = 0.85 * 0.85;
-              break;
-            case "daily":
-              frequencyMultiplier = 0.85 * 0.85 * 0.85;
-              break;
-            case "once":
-              frequencyMultiplier = 1.25; // Assume one-time is more expensive
-              break;
+            case "monthly": multiplier = 1; break;
+            case "biweekly": multiplier = 0.85; break;
+            case "weekly": multiplier = 0.85 * 0.85; break;
+            case "daily": multiplier = 0.85 * 0.85 * 0.85; break;
+            case "once": multiplier = 1.25; break;
           }
-
-          total = total * frequencyMultiplier;
+          total *= multiplier;
         }
 
-        // ------------------------------
-        // CUSTOM CLEANING
-        // ------------------------------
+        // Custom Cleaning
         else if (cleaningType === "custom") {
           result.innerHTML = "📞 Please call us for a custom cleaning quote.";
           return;
         }
-
-        // ------------------------------
-        // EXTRAS
-        // ------------------------------
-        if (oven) total += 50;
-        if (fridge) total += 50;
-        if (windows > 0) total += windows * 6;
 
         result.innerHTML = `Estimated Total: <strong>$${total.toFixed(2)}</strong>`;
       });
