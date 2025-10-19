@@ -75,6 +75,7 @@
       appearance: none;
       -webkit-appearance: none;
       -moz-appearance: none;
+      background-color: #fff;
     }
 
     input::-webkit-outer-spin-button,
@@ -91,6 +92,25 @@
     select:focus {
       border-color: var(--primary-color);
       outline: none;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background-color: var(--primary-color);
+      color: white;
+      font-size: 1.1em;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      margin-top: 24px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #0066cc;
     }
 
     .inline-option {
@@ -124,7 +144,6 @@
       color: var(--primary-color);
     }
 
-    /* Mobile Optimizations */
     @media (max-width: 768px) {
       body {
         padding: 20px 12px;
@@ -142,6 +161,11 @@
       input, select {
         font-size: 1em;
         padding: 10px;
+      }
+
+      button {
+        font-size: 1em;
+        padding: 12px;
       }
 
       #quoteResult {
@@ -179,13 +203,15 @@
 
       <label for="cleaningType">Cleaning Type:</label>
       <select id="cleaningType">
+        <option value="" disabled selected>Select Cleaning Type</option>
         <option value="deep">Deep Cleaning</option>
-        <option value="recurring" selected>Recurring Cleaning</option>
+        <option value="recurring">Recurring Cleaning</option>
         <option value="custom">Custom Cleaning</option>
       </select>
 
       <label for="frequency">Frequency:</label>
       <select id="frequency">
+        <option value="" disabled selected>Select Frequency</option>
         <option value="once">One-Time</option>
         <option value="monthly">Monthly</option>
         <option value="biweekly">Bi-Weekly</option>
@@ -207,10 +233,12 @@
           <label for="oven">Include Oven (+$50)</label>
         </div>
       </div>
+
+      <button id="calculateBtn">Calculate Total</button>
     </div>
 
     <div id="result-box">
-      <div id="quoteResult">Your Total is: $0.00</div>
+      <div id="quoteResult">Enter your details and click Calculate.</div>
     </div>
   </div>
 
@@ -228,6 +256,11 @@
       const ovenCheckbox = document.getElementById("oven");
       const extrasSection = document.getElementById("extras");
       const result = document.getElementById("quoteResult");
+      const calcBtn = document.getElementById("calculateBtn");
+
+      function clearResult() {
+        result.innerHTML = "Enter your details and click Calculate.";
+      }
 
       function calculateQuote() {
         const size = parseFloat(sizeInput.value);
@@ -237,8 +270,8 @@
         const fridge = fridgeCheckbox.checked;
         const oven = ovenCheckbox.checked;
 
-        if (!size || size <= 0) {
-          result.innerHTML = "⚠️ Please enter a valid property size.";
+        if (!size || size <= 0 || !cleaningType || !frequency) {
+          result.innerHTML = "⚠️ Please complete all fields before calculating.";
           return;
         }
 
@@ -256,7 +289,6 @@
           }
           total = Math.max(total, 250);
 
-          // Extras
           if (oven) total += 50;
           if (fridge) total += 50;
           if (windows > 0) total += windows * 6;
@@ -299,16 +331,18 @@
         result.innerHTML = `Your Total is: <strong>$${total.toFixed(2)}</strong>`;
       }
 
+      calcBtn.addEventListener("click", calculateQuote);
+
+      // Clear result when values change
       [sizeInput, cleaningTypeSelect, frequencySelect, windowsInput, fridgeCheckbox, ovenCheckbox].forEach(input => {
-        input.addEventListener("input", calculateQuote);
-        input.addEventListener("change", calculateQuote);
+        input.addEventListener("input", clearResult);
+        input.addEventListener("change", clearResult);
       });
 
+      // Show/hide extras for deep cleaning
       cleaningTypeSelect.addEventListener("change", function () {
         extrasSection.style.display = this.value === "deep" ? "block" : "none";
       });
-
-      calculateQuote();
     });
   </script>
 </body>
