@@ -62,14 +62,29 @@
 
     input,
     select {
+      display: block;
       width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
       padding: 12px;
       margin-top: 6px;
       border-radius: 8px;
       border: 1px solid #ccc;
       font-size: 1em;
       transition: border-color 0.2s ease;
-      box-sizing: border-box;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+    }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type=number] {
+      -moz-appearance: textfield;
     }
 
     input:focus,
